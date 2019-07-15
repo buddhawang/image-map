@@ -22,6 +22,7 @@
     "deploy": "gh-pages -d example/build"
   },
   "dependencies": {
+    "@types/ol": "^5.3.3",
     "ol": "^5.3.3"
   },
   "peerDependencies": {
