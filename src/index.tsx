@@ -3,6 +3,7 @@
  */
 
 import * as React from 'react';
+import './styles.css';
 
 //OpenLayers libraries
 import 'ol/ol.css';
