@@ -1,8 +1,12 @@
-/* add css styles here (optional) */
+.map-wrapper {
+  display: flex;
+  height: 100%;
+  padding-bottom: 10px;
+}
 
-.test {
-  display: inline-block;
-  margin: 2em auto;
-  border: 2px solid #000;
-  font-size: 2em;
+.map {
+  background-color: Gainsboro;
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
 }
