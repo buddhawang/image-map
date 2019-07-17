@@ -179,7 +179,9 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     }
 
     updateOcr() {
-        this.boundingBoxVectorLayer.getSource().forEachFeature(feature => this.props.featureUpdater(feature, this.imageExtend));
+        if (this.boundingBoxVectorLayer && this.boundingBoxVectorLayer.getSource()) {
+            this.boundingBoxVectorLayer.getSource().forEachFeature(feature => this.props.featureUpdater(feature, this.imageExtend));
+        }
     }
 
     createProjection(imageExtend: number[]) {
