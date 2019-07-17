@@ -194,7 +194,9 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
 
     createMapView(projection: Projection, imageExtend: number[]) {
         var minZoom = this.getMinimumZoom();
-        var rotation = this.ocrResult ? this.degreeToRadians(this.ocrResult.imageOrientation - this.ocrResult.imageTiltAngle) : 0;
+        var rotation = (this.ocrResult && this.ocrResult.imageOrientation != null && this.ocrResult.imageTiltAngle != null)
+            ? this.degreeToRadians(this.ocrResult.imageOrientation - this.ocrResult.imageTiltAngle)
+            : 0;
 
         return new View({
             projection: projection,
@@ -245,7 +247,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         // https://openlayers.org/en/latest/examples/min-zoom.html
         var containerAspectRatio = this.mapEl!.clientHeight / this.mapEl!.clientWidth;
         var imageAspectRatio = this.image.naturalHeight / this.image.naturalWidth;
-        if (this.ocrResult && this.ocrResult.imageOrientation % 180 != 0) {
+        if (this.ocrResult && this.ocrResult.imageOrientation != null && this.ocrResult.imageOrientation % 180 != 0) {
             imageAspectRatio = 1 / imageAspectRatio;
         }
         if (imageAspectRatio > containerAspectRatio) {
