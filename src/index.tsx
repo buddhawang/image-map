@@ -17,6 +17,9 @@ import Static from 'ol/source/ImageStatic';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import GeoJSON from 'ol/format/GeoJSON';
+import Style from 'ol/style/Style';
+import Draw, { createBox } from 'ol/interaction/Draw';
+import GeometryType from 'ol/geom/GeometryType';
 
 interface ImageMapProps {
     imageUri: string;
@@ -34,13 +37,17 @@ interface ImageMapProps {
     featureUpdater: Function;
     onFeatureUpdated: Function;
 
+    shouldEnableDrawingBox: boolean;
+    drawBoxStyler: () => Style;
+    onBoxDrawn: Function;
+
     onMapReady: Function;
 }
 
 interface ImageMapState {
 }
 
-export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
+export default class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     private image = new Image();
     private imageLayer: ImageLayer;
     private boundingBoxVectorLayer: VectorLayer;
@@ -58,6 +65,9 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     private mapEl: HTMLDivElement | null = null;
 
     private readonly BOUNDINGBOX_LAYER_NAME = 'boundingboxlayer';
+
+    private draw: any = null;
+    private drawBoxEnabled: boolean = false;
 
     private boundingBoxLayerFilter = {
         layerFilter: (layer: Layer) => layer.get('name') === this.BOUNDINGBOX_LAYER_NAME
@@ -120,6 +130,10 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         if (props.shouldUpdateFeature) {
             this.updateOcr()
             props.onFeatureUpdated();
+        }
+        if (props.shouldEnableDrawingBox != this.drawBoxEnabled) {
+            this.drawBoxEnabled = props.shouldEnableDrawingBox;
+            this.drawBoxEnabled ? this.addDrawBoxInteraction() : this.removeDrawBoxInteraction()
         }
     }
 
@@ -322,6 +336,31 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
       return degree * Math.PI * 2 / 360;
     }
   
+    // Allow user to draw boxes on the image
+    addDrawBoxInteraction() {
+        // To make the OpenLayers box the same color as selected button, have to set the style for each part of Draw seperately
+        this.draw = new Draw({
+            source: this.boundingBoxVectorLayer.getSource(),
+            type: GeometryType.CIRCLE,
+            stopClick: true,
+            style: this.props.drawBoxStyler,
+            geometryFunction: createBox()
+        });
+
+        this.draw.on('drawend', (e:any) => {
+            if (this.props.onBoxDrawn) {
+                this.props.onBoxDrawn(e.feature)
+            }
+        });
+
+        this.map.addInteraction(this.draw);
+    }
+
+    removeDrawBoxInteraction = () => {
+        if (this.draw) {
+            this.map.removeInteraction(this.draw);
+        }
+    }
 
     public render() {
         return (
