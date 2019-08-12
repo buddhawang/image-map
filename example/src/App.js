@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 
-import ImageMap from 'image-map'
+import { ImageMap } from 'image-map';
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";

@@ -47,7 +47,7 @@ interface ImageMapProps {
 interface ImageMapState {
 }
 
-export default class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
+export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     private image = new Image();
     private imageLayer: ImageLayer;
     private boundingBoxVectorLayer: VectorLayer;
