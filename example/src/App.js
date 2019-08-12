@@ -4,11 +4,13 @@ import ImageMap from 'image-map'
 import Style from "ol/style/Style";
 import Stroke from "ol/style/Stroke";
 import Fill from "ol/style/Fill";
+import 'ol/ol.css';
 
 export default class App extends Component {
   state = {
     ocr: null,
-    showOcr: true
+    showOcr: true,
+    enableDrawingBox: false
   }
 
   componentDidMount = () => {
@@ -23,6 +25,7 @@ export default class App extends Component {
     return (
       <div>
         <button onClick={this.toggleOcr}>Show/Hide OCR</button>
+        <button onClick={this.toggleDrawBox}>Draw Box</button>
         <ImageMap
           imageUri={process.env.PUBLIC_URL + '/resources/coffee.jpg'}
           ocrResult={(!this.state.showOcr || this.state.ocr == null) ? {} : this.state.ocr.recognitionResults[0]}
@@ -35,13 +38,20 @@ export default class App extends Component {
           shouldUpdateFeature={false}
           featureUpdater={() => {}}
           onFeatureUpdated={() => {}}
-          onMapReady={() => {}} />
+          onMapReady={() => {}}
+          shouldEnableDrawingBox={this.state.enableDrawingBox}
+          drawBoxStyler={undefined}
+          onBoxDrawn={undefined} />
       </div>
     )
   }
 
   toggleOcr = () => {
     this.setState({ showOcr: !this.state.showOcr });
+  }
+
+  toggleDrawBox = () => {
+    this.setState({ enableDrawingBox: !this.state.enableDrawingBox });
   }
 
   featureCreator = (text, boundingBox, extend) => {
