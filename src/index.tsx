@@ -7,7 +7,7 @@ import './styles.css';
 
 //OpenLayers libraries
 import 'ol/ol.css';
-import { Map, View, Feature } from 'ol';
+import { Map, View, Feature, MapBrowserEvent } from 'ol';
 import { defaults as defaultInteractions, DragRotateAndZoom, DragPan } from 'ol/interaction';
 import { getCenter } from 'ol/extent';
 import Projection from 'ol/proj/Projection';
@@ -38,8 +38,8 @@ interface ImageMapProps {
     onFeatureUpdated: Function;
 
     shouldEnableDrawingBox: boolean;
-    drawBoxStyler: () => Style;
-    onBoxDrawn: Function;
+    drawBoxStyler?: () => Style;
+    onBoxDrawn?: Function;
 
     onMapReady: Function;
 }
@@ -96,7 +96,6 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
 
         this.getMinimumZoom = this.getMinimumZoom.bind(this);
 
-        this.handleClick = this.handleClick.bind(this);
         this.handlePointerDown = this.handlePointerDown.bind(this);
         this.handlePointerMove = this.handlePointerMove.bind(this);
         this.handlePointerUp = this.handlePointerUp.bind(this);
@@ -143,6 +142,14 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         return false;
     }
 
+    render() {
+        return (
+            <div className="map-wrapper">
+                <div id="map" className="map" ref={el => this.mapEl = el}></div>
+            </div>
+        );
+    }
+
     loadImage() {
         this.image.src = this.imageUri;
     }
@@ -167,18 +174,15 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.boundingBoxVectorLayer = new VectorLayer(options);
 
         this.map = new Map({
-            interactions: defaultInteractions().extend([new DragRotateAndZoom()]),
+            interactions: defaultInteractions({ doubleClickZoom: false }).extend([new DragRotateAndZoom()]),
             target: 'map',
             layers: [this.imageLayer, this.boundingBoxVectorLayer],
             view: this.createMapView(projection, this.imageExtend)
         });
 
-        if (this.props.enableFeatureSelection) {
-            this.map.on('click', this.handleClick);
-            this.map.on('pointerdown', this.handlePointerDown);
-            this.map.on('pointermove', this.handlePointerMove);
-            this.map.on('pointerup', this.handlePointerUp);
-        }
+        this.map.on('pointerdown', this.handlePointerDown);
+        this.map.on('pointermove', this.handlePointerMove);
+        this.map.on('pointerup', this.handlePointerUp);
     }
 
     resetImage() {
@@ -274,21 +278,14 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
-    handleClick(event: any) {
-        if (event.dragging) {
+    handlePointerDown(event: MapBrowserEvent) {
+        if (!this.props.enableFeatureSelection) {
             return;
         }
 
-        this.map.forEachFeatureAtPixel(
-            this.map.getEventPixel(event.originalEvent),
-            (feature) => this.props.handleFeatureSelect(feature),
-            this.boundingBoxLayerFilter);
-    }
-
-    handlePointerDown(event: any) {
         this.countPointerDown += 1;
         if (this.countPointerDown >= 2) {
-            this.setDragPanInteraction(true);
+            this.setDragPanInteraction(true /*dragPanEnabled*/);
             this.isSwiping = false;
             return;
         }
@@ -297,11 +294,22 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
             this.map.getEventPixel(event.originalEvent),
             this.boundingBoxLayerFilter);
 
+        if (isPointerOnFeature) {
+            this.map.forEachFeatureAtPixel(
+                this.map.getEventPixel(event.originalEvent),
+                (feature) => this.props.handleFeatureSelect(feature),
+                this.boundingBoxLayerFilter);
+        }
+
+        this.setDragPanInteraction(!isPointerOnFeature /*dragPanEnabled*/);
         this.isSwiping = isPointerOnFeature;
-        this.setDragPanInteraction(!isPointerOnFeature);
     }
 
-    handlePointerMove(event: any) {
+    handlePointerMove(event: MapBrowserEvent) {
+        if (!this.props.enableFeatureSelection) {
+            return;
+        }
+
         if (!this.isSwiping) {
             return;
         }
@@ -316,10 +324,14 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     }
 
     handlePointerUp() {
+        if (!this.props.enableFeatureSelection) {
+            return;
+        }
+
         this.countPointerDown -= 1;
         if (this.countPointerDown == 0) {
+            this.setDragPanInteraction(true /*dragPanEnabled*/);
             this.isSwiping = false;
-            this.setDragPanInteraction(true);
         }
     }
 
@@ -362,11 +374,4 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
-    public render() {
-        return (
-            <div className="map-wrapper">
-                <div id="map" className="map" ref={el => this.mapEl = el}></div>
-            </div>
-        );
-    }
 }
