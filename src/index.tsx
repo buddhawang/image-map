@@ -350,7 +350,6 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
   
     // Allow user to draw boxes on the image
     addDrawBoxInteraction() {
-        // To make the OpenLayers box the same color as selected button, have to set the style for each part of Draw seperately
         this.draw = new Draw({
             source: this.boundingBoxVectorLayer.getSource(),
             type: GeometryType.CIRCLE,
@@ -361,7 +360,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
 
         this.draw.on('drawend', (e:any) => {
             if (this.props.onBoxDrawn) {
-                this.props.onBoxDrawn(e.feature)
+                this.props.onBoxDrawn(e.feature, this.imageExtend);
             }
         });
 
