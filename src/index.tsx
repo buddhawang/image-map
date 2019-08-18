@@ -101,6 +101,12 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.handlePointerUp = this.handlePointerUp.bind(this);
 
         this.setDragPanInteraction = this.setDragPanInteraction.bind(this);
+
+        this.addFeature = this.addFeature.bind(this);
+        this.addFeatures = this.addFeatures.bind(this);
+        this.getAllFeatures = this.getAllFeatures.bind(this);
+        this.removeFeature = this.removeFeature.bind(this);
+        this.removeAllFeatures = this.removeAllFeatures.bind(this);
     }
 
     public componentDidMount() {
@@ -140,6 +146,41 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         // We don't need React to re-render the DOM structure, openlayers will redraw the map for us.
         // Set it to false for improving performance.
         return false;
+    }
+
+    /**
+     * Add one feature to the map
+     */
+    public addFeature(feature: Feature) {
+        this.boundingBoxVectorLayer.getSource().addFeature(feature);
+    }
+
+    /**
+     * Add features to the map
+     */
+    public addFeatures(features: Feature[]) {
+        this.boundingBoxVectorLayer.getSource().addFeatures(features);
+    }
+
+    /**
+     * Get all features from the map
+     */
+    public getAllFeatures() {
+        return this.boundingBoxVectorLayer.getSource().getFeatures();
+    }
+
+    /**
+     * Remove specific feature object from the map
+     */
+    public removeFeature(feature: Feature) {
+        this.boundingBoxVectorLayer.getSource().removeFeature(feature);
+    }
+
+    /**
+     * Remove all features from the map
+     */
+    public removeAllFeatures() {
+        this.boundingBoxVectorLayer.getSource().clear();
     }
 
     public render() {
