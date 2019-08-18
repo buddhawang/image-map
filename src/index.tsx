@@ -103,17 +103,17 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.setDragPanInteraction = this.setDragPanInteraction.bind(this);
     }
 
-    componentDidMount() {
+    public componentDidMount() {
         this.image.addEventListener("load", this.onImageLoad);
         this.initMap();
         this.loadImage();
     }
 
-    componentWillUnmount() {
+    public componentWillUnmount() {
         this.image.removeEventListener("load", this.onImageLoad);
     }
 
-    componentWillReceiveProps(props: ImageMapProps) {
+    public componentWillReceiveProps(props: ImageMapProps) {
         if (props.imageUri != this.imageUri) {
             this.imageUri = props.imageUri;
             this.loadImage();
@@ -136,13 +136,13 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
-    shouldComponentUpdate() {
+    public shouldComponentUpdate() {
         // We don't need React to re-render the DOM structure, openlayers will redraw the map for us.
         // Set it to false for improving performance.
         return false;
     }
 
-    render() {
+    public render() {
         return (
             <div className="map-wrapper">
                 <div id="map" className="map" ref={el => this.mapEl = el}></div>
@@ -150,18 +150,18 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         );
     }
 
-    loadImage() {
+    private loadImage() {
         this.image.src = this.imageUri;
     }
 
-    onImageLoad(event: any) {
+    private onImageLoad(event: any) {
         this.imageExtend = [0, 0, event.target.width, event.target.height];
         this.resetImage();
         this.updateOcr();
         this.props.onMapReady();
     }
 
-    initMap() {
+    private initMap() {
         var projection = this.createProjection(this.imageExtend);
 
         this.imageLayer = new ImageLayer({
@@ -185,24 +185,24 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.map.on('pointerup', this.handlePointerUp);
     }
 
-    resetImage() {
+    private resetImage() {
         var projection = this.createProjection(this.imageExtend);
         this.imageLayer.setSource(this.createImageSource(this.imageUri, projection, this.imageExtend));
         var mapView = this.createMapView(projection, this.imageExtend);
         this.map.setView(mapView);
     }
 
-    resetOcr() {
+    private resetOcr() {
         this.drawBoundingBox(this.createBoundingBoxVectorFeatures());
     }
 
-    updateOcr() {
+    private updateOcr() {
         if (this.boundingBoxVectorLayer && this.boundingBoxVectorLayer.getSource()) {
             this.boundingBoxVectorLayer.getSource().forEachFeature(feature => this.props.featureUpdater(feature, this.imageExtend));
         }
     }
 
-    createProjection(imageExtend: number[]) {
+    private createProjection(imageExtend: number[]) {
         return new Projection({
             code: 'xkcd-image',
             units: 'pixels',
@@ -210,7 +210,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         });
     }
 
-    createMapView(projection: Projection, imageExtend: number[]) {
+    private createMapView(projection: Projection, imageExtend: number[]) {
         var minZoom = this.getMinimumZoom();
         var rotation = (this.ocrResult && this.ocrResult.imageOrientation != null && this.ocrResult.imageTiltAngle != null)
             ? this.degreeToRadians(this.ocrResult.imageOrientation - this.ocrResult.imageTiltAngle)
@@ -225,7 +225,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         });
     }
 
-    createImageSource(imageUri: string, projection: Projection, imageExtend: number[]) {
+    private createImageSource(imageUri: string, projection: Projection, imageExtend: number[]) {
         return new Static({
             url: imageUri,
             projection: projection,
@@ -233,7 +233,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         })
     }
 
-    createBoundingBoxVectorFeatures() {
+    private createBoundingBoxVectorFeatures() {
         this.ocrFeatures = [];
         if (this.ocrResult.lines != null) {
             this.ocrResult.lines.forEach((line: { words: { forEach: (arg0: (word: any) => number) => void; } | null; }) => {
@@ -245,7 +245,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         return this.ocrFeatures;
     }
 
-    drawBoundingBox(boundingBoxVectorFeatures: Feature[]) {
+    private drawBoundingBox(boundingBoxVectorFeatures: Feature[]) {
         var geoJsonObject = {
             'type': 'FeatureCollection',
             'crs': {
@@ -260,7 +260,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.boundingBoxVectorLayer.setSource(source);
     }
 
-    getMinimumZoom() {
+    private getMinimumZoom() {
         // In openlayers, the image will be projected into 256x256 pixels, and image will be 2x larger at each zoom level.
         // https://openlayers.org/en/latest/examples/min-zoom.html
         var containerAspectRatio = this.mapEl!.clientHeight / this.mapEl!.clientWidth;
@@ -278,7 +278,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
-    handlePointerDown(event: MapBrowserEvent) {
+    private handlePointerDown(event: MapBrowserEvent) {
         if (!this.props.enableFeatureSelection) {
             return;
         }
@@ -305,7 +305,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.isSwiping = isPointerOnFeature;
     }
 
-    handlePointerMove(event: MapBrowserEvent) {
+    private handlePointerMove(event: MapBrowserEvent) {
         if (!this.props.enableFeatureSelection) {
             return;
         }
@@ -323,7 +323,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
             this.boundingBoxLayerFilter);
     }
 
-    handlePointerUp() {
+    private handlePointerUp() {
         if (!this.props.enableFeatureSelection) {
             return;
         }
@@ -335,7 +335,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
-    setDragPanInteraction(dragPanEnabled: boolean) {
+    private setDragPanInteraction(dragPanEnabled: boolean) {
         this.map.getInteractions().forEach(interaction => {
             if (interaction instanceof DragPan) {
                 interaction.setActive(dragPanEnabled);
@@ -344,12 +344,12 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     }
 
     // convert degree to radians
-    degreeToRadians(degree: number) {
+    private degreeToRadians(degree: number) {
       return degree * Math.PI * 2 / 360;
     }
   
     // Allow user to draw boxes on the image
-    addDrawBoxInteraction() {
+    private addDrawBoxInteraction() {
         this.draw = new Draw({
             source: this.boundingBoxVectorLayer.getSource(),
             type: GeometryType.CIRCLE,
@@ -367,7 +367,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.map.addInteraction(this.draw);
     }
 
-    removeDrawBoxInteraction = () => {
+    private removeDrawBoxInteraction = () => {
         if (this.draw) {
             this.map.removeInteraction(this.draw);
         }
