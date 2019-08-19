@@ -189,6 +189,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     public getImageExtent() {
         return this.imageExtend;
     }
+    
     public render() {
         return (
             <div className="map-wrapper">
