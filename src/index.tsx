@@ -183,6 +183,12 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         this.boundingBoxVectorLayer.getSource().clear();
     }
 
+    /**
+     * Get the image extent (left, top, right, bottom)
+     */
+    public getImageExtent() {
+        return this.imageExtend;
+    }
     public render() {
         return (
             <div className="map-wrapper">
