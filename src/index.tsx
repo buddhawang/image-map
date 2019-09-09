@@ -9,7 +9,7 @@ import './styles.css';
 import 'ol/ol.css';
 import { Map, View, Feature, MapBrowserEvent } from 'ol';
 import { defaults as defaultInteractions, DragRotateAndZoom, DragPan } from 'ol/interaction';
-import { getCenter } from 'ol/extent';
+import { getCenter, Extent } from 'ol/extent';
 import Projection from 'ol/proj/Projection';
 import Layer from 'ol/layer/Layer';
 import ImageLayer from 'ol/layer/Image';
@@ -189,7 +189,18 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     public getImageExtent() {
         return this.imageExtend;
     }
-    
+
+    /**
+     * Get features at specific extend
+     */
+    public getFeaturesInExtent(extent: Extent) {
+        let features: Feature[] = [];
+        this.boundingBoxVectorLayer.getSource().forEachFeatureInExtent(extent, feature => {
+            features.push(feature);
+        });
+        return features;
+    }
+
     public render() {
         return (
             <div className="map-wrapper">
