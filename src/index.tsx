@@ -69,6 +69,9 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     private draw: any = null;
     private drawBoxEnabled: boolean = false;
 
+    private ignorePointerMoveEventCount = 5;
+    private pointerMoveEventCount = 0;
+    
     private boundingBoxLayerFilter = {
         layerFilter: (layer: Layer) => layer.get('name') === this.BOUNDINGBOX_LAYER_NAME
     };
@@ -365,11 +368,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
     }
 
     private handlePointerMove(event: MapBrowserEvent) {
-        if (!this.props.enableFeatureSelection) {
-            return;
-        }
-
-        if (!this.isSwiping) {
+        if (this.shouldIgnorePointerMove()) {
             return;
         }
 
@@ -391,6 +390,7 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         if (this.countPointerDown == 0) {
             this.setDragPanInteraction(true /*dragPanEnabled*/);
             this.isSwiping = false;
+            this.pointerMoveEventCount = 0;
         }
     }
 
@@ -432,4 +432,20 @@ export class ImageMap extends React.Component<ImageMapProps, ImageMapState> {
         }
     }
 
+    private shouldIgnorePointerMove() {
+        if (!this.props.enableFeatureSelection) {
+            return true;
+        }
+
+        if (!this.isSwiping) {
+            return true;
+        }
+
+        if (this.ignorePointerMoveEventCount > this.pointerMoveEventCount) {
+            ++this.pointerMoveEventCount;
+            return true;
+        }
+
+        return false;
+    }
 }
