@@ -14,13 +14,27 @@ npm install --save image-map
 
 ```tsx
 import * as React from 'react'
-
-import MyComponent from 'image-map'
+import ImageMap from 'image-map'
 
 class Example extends React.Component {
   render () {
     return (
-      <MyComponent />
+        <ImageMap
+          imageUri={"your_image_url"}
+          ocrResult={{}}
+          enableFeatureSelection={false}
+          handleFeatureSelect={() => {}}
+          shouldCreateFeature={false}
+          featureCreator={() => {}}
+          onFeatureCreated={() => {}}
+          featureStyler={() => {}}
+          shouldUpdateFeature={false}
+          featureUpdater={() => {}}
+          onFeatureUpdated={() => {}}
+          onMapReady={() => {}}
+          shouldEnableDrawingBox={false}
+          drawBoxStyler={undefined}
+          onBoxDrawn={undefined} />
     )
   }
 }
@@ -28,4 +42,4 @@ class Example extends React.Component {
 
 ## License
 
-MIT © [buddhawang](https://github.com/buddhawang)
+MIT, Copyright @ Microsoft Corporation
