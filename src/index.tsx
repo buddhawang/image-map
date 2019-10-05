@@ -23,21 +23,19 @@ import GeometryType from 'ol/geom/GeometryType';
 
 interface ImageMapProps {
     imageUri: string;
+    imageWidth: number;
+    imageHeight: number;
+    imageAngle?: number;
+
     ocrResult: any;
+    featureCreator: Function;
+    featureStyler: Function;
+    featureUpdater?: Function;
+
     enableFeatureSelection: boolean;
     handleFeatureSelect: Function;
 
-    shouldCreateFeature: boolean;
-    featureCreator: Function;
-    onFeatureCreated: Function;
-
-    featureStyler: Function;
-
-    shouldUpdateFeature: boolean;
-    featureUpdater: Function;
-    onFeatureUpdated: Function;
-
-    shouldEnableDrawingBox: boolean;
+    shouldEnableDrawingBox?: boolean;
     drawBoxStyler?: () => Style;
     onBoxDrawn?: Function;
 
