@@ -1,9 +1,6 @@
 import ImageMap from "image-map";
 import GeoJSON from "ol/format/GeoJSON.js";
 import "ol/ol.css";
-import Fill from "ol/style/Fill";
-import Stroke from "ol/style/Stroke";
-import Style from "ol/style/Style";
 import React, { Component } from "react";
 
 export default class App extends Component {
@@ -32,20 +29,9 @@ export default class App extends Component {
           ref={(ref) => this.imageMap = ref}
           imageUri={this.state.imageUri}
           imageWidth={this.state.imageWidth}
-          imageHeight={this.state.imageHeight}
-          enableFeatureSelection={false}
-          handleFeatureSelect={() => {}}
-          featureStyler={this.featureStyler} />
+          imageHeight={this.state.imageHeight} />
       </div>
     )
-  }
-
-  toggleOcr = () => {
-    this.setState({ showOcr: !this.state.showOcr });
-  }
-
-  toggleDrawBox = () => {
-    this.setState({ enableDrawingBox: !this.state.enableDrawingBox });
   }
 
   featureCreator = (text, boundingBox, imageExtent, ocrExtent) => {
@@ -78,18 +64,6 @@ export default class App extends Component {
     };
 
     return feature;
-  }
-
-  featureStyler = () => {
-    return new Style({
-        stroke: new Stroke({
-            color: "yellow",
-            width: 1
-        }),
-        fill: new Fill({
-            color: "rgba(255, 255, 0, 0.3)"
-        })
-    });
   }
 
   imageOnLoad = () => {
