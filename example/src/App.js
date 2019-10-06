@@ -1,47 +1,41 @@
-import React, { Component } from 'react'
-
-import { ImageMap } from 'image-map';
-import Style from "ol/style/Style";
-import Stroke from "ol/style/Stroke";
+import ImageMap from "image-map";
+import GeoJSON from "ol/format/GeoJSON.js";
+import "ol/ol.css";
 import Fill from "ol/style/Fill";
-import 'ol/ol.css';
+import Stroke from "ol/style/Stroke";
+import Style from "ol/style/Style";
+import React, { Component } from "react";
 
 export default class App extends Component {
   state = {
-    ocr: null,
-    showOcr: true,
-    enableDrawingBox: false
+    imageUri: "",
+    imageWidth: 0,
+    imageHeight: 0,
   }
 
-  componentDidMount = () => {
-    fetch(process.env.PUBLIC_URL + '/resources/coffee.jpg.ocr.json')
-      .then(response => response.json())
-      .then(json => {
-        this.setState({ ocr: json });
-      });
+  imageElement = new Image();
+  imageMap;
+
+  componentDidMount() {
+    this.imageElement.addEventListener("load", this.imageOnLoad);
+    this.imageElement.src = process.env.PUBLIC_URL + "/resources/coffee.jpg";
+  }
+
+  componentWillUnmount() {
+    this.imageElement.removeEventListener("load", this.imageOnLoad);
   }
 
   render = () => {
     return (
       <div>
-        <button onClick={this.toggleOcr}>Show/Hide OCR</button>
-        <button onClick={this.toggleDrawBox}>Draw Box</button>
         <ImageMap
-          imageUri={process.env.PUBLIC_URL + '/resources/coffee.jpg'}
-          ocrResult={(!this.state.showOcr || this.state.ocr == null) ? {} : this.state.ocr.recognitionResults[0]}
+          ref={(ref) => this.imageMap = ref}
+          imageUri={this.state.imageUri}
+          imageWidth={this.state.imageWidth}
+          imageHeight={this.state.imageHeight}
           enableFeatureSelection={false}
           handleFeatureSelect={() => {}}
-          shouldCreateFeature={false}
-          featureCreator={this.featureCreator}
-          onFeatureCreated={() => {}}
-          featureStyler={this.featureStyler}
-          shouldUpdateFeature={false}
-          featureUpdater={() => {}}
-          onFeatureUpdated={() => {}}
-          onMapReady={() => {}}
-          shouldEnableDrawingBox={this.state.enableDrawingBox}
-          drawBoxStyler={undefined}
-          onBoxDrawn={undefined} />
+          featureStyler={this.featureStyler} />
       </div>
     )
   }
@@ -54,12 +48,12 @@ export default class App extends Component {
     this.setState({ enableDrawingBox: !this.state.enableDrawingBox });
   }
 
-  featureCreator = (text, boundingBox, extend) => {
-    var coordinates = [];
-    var imageWidth = extend[2] - extend[0];
-    var imageHeight = extend[3] - extend[1];
-    var ocrWidth = this.state.ocr.recognitionResults[0].width;
-    var ocrHeight = this.state.ocr.recognitionResults[0].height;
+  featureCreator = (text, boundingBox, imageExtent, ocrExtent) => {
+    const coordinates = [];
+    const imageWidth = imageExtent[2] - imageExtent[0];
+    const imageHeight = imageExtent[3] - imageExtent[1];
+    const ocrWidth = ocrExtent[2] - ocrExtent[0];
+    const ocrHeight = ocrExtent[3] - ocrExtent[1];
 
     for (let i = 0; i < boundingBox.length; i += 2) {
         // boundingBox is int[8] to represent 4 points of rectangle: [x1, y1, x2, y2, x3, y3, x4, y4]
@@ -70,35 +64,70 @@ export default class App extends Component {
         ]);
     }
 
-    var feature = {
-        'type': 'Feature',
-        'properties': {
-            'state': 'unselected',
-            'text': text,
-            'boundingbox': boundingBox
+    const feature = {
+        "type": "Feature",
+        "properties": {
+            "state": "unselected",
+            "text": text,
+            "boundingbox": boundingBox
         },
-        'geometry': {
-            'type': 'Polygon',
-            'coordinates': [coordinates]
+        "geometry": {
+            "type": "Polygon",
+            "coordinates": [coordinates]
         }
     };
 
     return feature;
   }
 
-  featureStyler = (feature) => {
+  featureStyler = () => {
     return new Style({
         stroke: new Stroke({
-            color: 'yellow',
+            color: "yellow",
             width: 1
         }),
         fill: new Fill({
-            color: 'rgba(255, 255, 0, 0.3)'
+            color: "rgba(255, 255, 0, 0.3)"
         })
     });
   }
 
-  featureUpdater = (feature, extend) => {
-    return feature;
+  imageOnLoad = () => {
+    this.setState({
+      imageUri: this.imageElement.src,
+      imageWidth: this.imageElement.width,
+      imageHeight: this.imageElement.height,
+    }, () => {
+      // display OCR
+      fetch(process.env.PUBLIC_URL + "/resources/coffee.jpg.ocr.json")
+        .then(response => response.json())
+        .then(json => {
+          const features = this.convertOcrToFeatures(json);
+          this.imageMap.addFeatures(features);
+        });
+    });
+  }
+
+  convertOcrToFeatures = (json) => {
+    const imageExtent = this.imageMap.getImageExtent();
+    const ocrExtent = [0, 0, json.recognitionResults[0].width, json.recognitionResults[0].height];
+
+    const features = [];
+    json.recognitionResults[0].lines.forEach((line) => {
+      line.words.forEach((word) => {
+        const feature = this.featureCreator(word.text, word.boundingBox, imageExtent, ocrExtent);
+        features.push(feature);
+      });
+    });
+
+    const geoJsonObject = {
+      "type": "FeatureCollection",
+      "crs": {
+          "type": "name",
+      },
+      "features": features,
+    }
+
+    return (new GeoJSON()).readFeatures(geoJsonObject);
   }
 }

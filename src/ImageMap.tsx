@@ -1,14 +1,15 @@
 import { Feature, MapBrowserEvent, View } from "ol";
 import { Extent, getCenter } from "ol/extent";
-import { defaults as defaultInteractions, DragPan, DragRotateAndZoom, Interaction } from 'ol/interaction.js';
+import { defaults as defaultInteractions, DragPan, DragRotateAndZoom, Interaction } from "ol/interaction.js";
 import ImageLayer from "ol/layer/Image";
 import Layer from "ol/layer/Layer";
 import VectorLayer from "ol/layer/Vector";
 import Map from "ol/Map";
 import Projection from "ol/proj/Projection";
-import Static from 'ol/source/ImageStatic.js';
+import Static from "ol/source/ImageStatic.js";
 import VectorSource from "ol/source/Vector";
 import * as React from "react";
+import "./styles.css";
 import Utils from "./Utils";
 
 interface ImageMapProps {
@@ -32,7 +33,6 @@ export class ImageMap extends React.Component<ImageMapProps> {
 
     private mapElement: HTMLDivElement | null = null;
 
-    private imageUri: string;
     private imageExtent: number[];
 
     private countPointerDown: number = 0;
@@ -50,7 +50,6 @@ export class ImageMap extends React.Component<ImageMapProps> {
     constructor(props: ImageMapProps) {
         super(props);
 
-        this.imageUri = this.props.imageUri;
         this.imageExtent = [0, 0, this.props.imageWidth, this.props.imageHeight];
     }
 
@@ -59,10 +58,9 @@ export class ImageMap extends React.Component<ImageMapProps> {
     }
 
     componentDidUpdate(prevProps: ImageMapProps) {
-        if (prevProps.imageUri !== this.imageUri) {
-            this.imageUri = prevProps.imageUri;
+        if (prevProps.imageUri !== this.props.imageUri) {
             this.imageExtent = [0, 0, this.props.imageWidth, this.props.imageHeight];
-            this.setImage(this.imageUri, this.imageExtent);
+            this.setImage(this.props.imageUri, this.imageExtent);
         }
     }
 
@@ -145,7 +143,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         const projection = this.createProjection(this.imageExtent);
 
         this.imageLayer = new ImageLayer({
-            source: this.createImageSource(this.imageUri, projection, this.imageExtent)
+            source: this.createImageSource(this.props.imageUri, projection, this.imageExtent)
         });
 
         const options: any = {};
@@ -166,14 +164,14 @@ export class ImageMap extends React.Component<ImageMapProps> {
         this.map.on("pointerup", this.handlePointerUp);
     }
 
-    private setImage(imageUri: string, imageExtent: number[]) {
+    private setImage = (imageUri: string, imageExtent: number[]) => {
         const projection = this.createProjection(imageExtent);
         this.imageLayer.setSource(this.createImageSource(imageUri, projection, imageExtent));
         const mapView = this.createMapView(projection, imageExtent);
         this.map.setView(mapView);
     }
 
-    private createProjection(imageExtend: number[]) {
+    private createProjection = (imageExtend: number[]) => {
         return new Projection({
             code: "xkcd-image",
             units: "pixels",
@@ -181,7 +179,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         });
     }
 
-    private createMapView(projection: Projection, imageExtend: number[]) {
+    private createMapView = (projection: Projection, imageExtend: number[]) => {
         const minZoom = this.getMinimumZoom();
         const rotation = (this.props.imageAngle)
             ? Utils.degreeToRadians((this.props.imageAngle + 360) % 360)
@@ -196,7 +194,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         });
     }
 
-    private createImageSource(imageUri: string, projection: Projection, imageExtend: number[]) {
+    private createImageSource = (imageUri: string, projection: Projection, imageExtend: number[]) => {
         return new Static({
             url: imageUri,
             projection: projection,
@@ -204,7 +202,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         });
     }
 
-    private getMinimumZoom() {
+    private getMinimumZoom = () => {
         // In openlayers, the image will be projected into 256x256 pixels, and image will be 2x larger at each zoom level.
         // https://openlayers.org/en/latest/examples/min-zoom.html
 
@@ -220,7 +218,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         }
     }
 
-    private handlePointerDown(event: MapBrowserEvent) {
+    private handlePointerDown = (event: MapBrowserEvent) => {
         if (!this.props.enableFeatureSelection) {
             return;
         }
@@ -252,7 +250,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         this.isSwiping = isPointerOnFeature;
     }
 
-    private handlePointerMove(event: MapBrowserEvent) {
+    private handlePointerMove = (event: MapBrowserEvent) => {
         if (this.shouldIgnorePointerMove()) {
             return;
         }
@@ -271,7 +269,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
             this.vectorLayerFilter);
     }
 
-    private handlePointerUp() {
+    private handlePointerUp = () => {
         if (!this.props.enableFeatureSelection) {
             return;
         }
@@ -284,7 +282,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         }
     }
 
-    private setDragPanInteraction(dragPanEnabled: boolean) {
+    private setDragPanInteraction = (dragPanEnabled: boolean) => {
         this.map.getInteractions().forEach(interaction => {
             if (interaction instanceof DragPan) {
                 interaction.setActive(dragPanEnabled);
@@ -292,7 +290,7 @@ export class ImageMap extends React.Component<ImageMapProps> {
         });
     }
 
-    private shouldIgnorePointerMove() {
+    private shouldIgnorePointerMove = () => {
         if (!this.props.enableFeatureSelection) {
             return true;
         }
