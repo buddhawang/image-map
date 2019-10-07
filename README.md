@@ -1,4 +1,4 @@
-# image-map
+# ol-image-map
 
 > 
 
@@ -7,16 +7,16 @@
 ## Install
 
 ```bash
-npm install --save image-map
+npm install --save ol-image-map
 ```
 
 ## Usage
 
 ```tsx
 import * as React from 'react'
-import ImageMap from 'image-map'
+import ImageMap from 'ol-image-map'
 
-class Example extends React.Component {
+class App extends React.Component {
   render () {
     return (
         <ImageMap
