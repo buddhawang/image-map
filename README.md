@@ -21,20 +21,8 @@ class Example extends React.Component {
     return (
         <ImageMap
           imageUri={"your_image_url"}
-          ocrResult={{}}
-          enableFeatureSelection={false}
-          handleFeatureSelect={() => {}}
-          shouldCreateFeature={false}
-          featureCreator={() => {}}
-          onFeatureCreated={() => {}}
-          featureStyler={() => {}}
-          shouldUpdateFeature={false}
-          featureUpdater={() => {}}
-          onFeatureUpdated={() => {}}
-          onMapReady={() => {}}
-          shouldEnableDrawingBox={false}
-          drawBoxStyler={undefined}
-          onBoxDrawn={undefined} />
+          imageWidth={"your_image_width"}
+          imageHeight={"your_image_height"} />
     )
   }
 }
